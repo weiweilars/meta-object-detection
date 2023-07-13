@@ -50,11 +50,25 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
+        # image need to be used in the inference
+    cfg.data.share = cfg.model.share
+
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
 
+    # train_loader = datamodule.train_dataloader()
+    # val_loader = datamodule.val_dataloader().copy()
+    # import pdb
+
+    # pdb.set_trace()
+
     log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.model)
+    model: LightningModule = hydra.utils.instantiate(
+        cfg.model,
+        support_dataloader=datamodule.get_support_dataloader(),
+        base_ids=datamodule.val_base_ds,
+        novel_ids=datamodule.val_act_ids,
+    )
 
     log.info("Instantiating callbacks...")
     callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
@@ -63,7 +77,9 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+    trainer: Trainer = hydra.utils.instantiate(
+        cfg.trainer
+    )  # , callbacks=callbacks, logger=logger)
 
     object_dict = {
         "cfg": cfg,
@@ -102,7 +118,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     # merge train and test metrics
     metric_dict = {**train_metrics, **test_metrics}
 
-    return metric_dict, object_dict
+    return metric_dict  # , object_dict
 
 
 @hydra.main(version_base="1.3", config_path="../configs", config_name="train.yaml")

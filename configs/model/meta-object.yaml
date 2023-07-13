@@ -1,0 +1,76 @@
+_target_: src.models.meta_object_module.MetaObjectModule
+
+share:
+  fewshot_finetune: False
+  seed: 6666
+  cache_mode: False
+  with_support: True
+
+train_shared:
+  replace: True
+
+with_box_refine: False
+resume: False
+device: cuda
+num_classes: 91
+
+optimizer:
+  lr: 2e-4
+  lr_backbone_names:
+    - backbone.0
+  lr_backbone: 2e-5
+  lr_linear_proj_names:
+    - reference_points
+    - sampling_offsets
+  lr_linear_proj_mult: 0.1
+  embedding_related_names:
+    - level_embed
+    - query_embed
+  weight_decay: 1e-4
+  lr_drop_milestones:
+    - 45
+  warmup_epochs: 0
+  warmup_factor: 0.1
+  start_epoch: 0
+
+
+backbone:
+  backbone: resnet50 #resenet101
+  dilation: store_true
+  freeze_backbone_at_layer: 2
+  num_feature_levels: 1
+  position_embedding: sine
+  position_embedding_scale: 2 #!! * np.pi
+
+
+transformer:
+  enc_layers: 1 #6
+  dec_layers: 1 #6
+  dim_feedforward: 1024
+  hidden_dim: 256
+  dropout: 0.1
+  nheads: 8
+  num_queries: 300
+  enc_n_points: 4
+  dec_n_points: 4
+  episode_num: 5
+  episode_size: 5
+
+
+loss:
+  aux_loss: False
+  category_codes_cls_loss: True
+
+matcher:
+  set_cost_class: 2.0
+  set_cost_bbox: 5.0
+  set_cost_giou: 2.0
+
+loss_coef:
+  mask_loss_coef: 1.0
+  dice_loss_coef: 1.0
+  cls_loss_coef: 2.0
+  bbox_loss_coef: 5.0
+  giou_loss_coef: 2.0
+  category_codes_cls_loss_coef: 5.0
+  focal_alpha: 0.25

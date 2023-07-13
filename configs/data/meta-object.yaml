@@ -1,0 +1,32 @@
+_target_: src.data.meta_object_datamodule.MetaObjectDataModule
+
+data_dir: ${paths.data_dir}
+
+share:
+  replace: True
+
+fewshot_seed: 1
+num_shots: 10
+num_workers: 2
+total_num_support: 15
+max_pos_support: 10
+
+
+
+train_loader:
+  img_folder: train2017
+  ann_file: annotations/instances_train2017.json
+  batch_size: 1
+
+
+val_loader:
+  img_folder: val2017
+  ann_file: annotations/instances_val2017.json
+  batch_size: 1
+
+
+fewshot_loader:
+  img_folder: fewshot2017
+  ann_file: annotations/fewshot.json
+  sup_ann_file: annotations/support.json
+  batch_size: 1
