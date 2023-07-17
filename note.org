@@ -62,3 +62,13 @@ Constructor of Microsoft COCO helper class for reading and visualizing annotatio
 :param annotation_file (str): location of annotation file
 :param image_folder (str): location to the folder that hosts images.
 :return:
+
+
+* List of tasks:
+** change dataloader and dataset according to real labeled data
+** write the test_step
+** Set mlflow
+** Write the callback functions to output object detect test image
+** download coco data to databricks
+** training base model on databricks
+** training novel model on databricks

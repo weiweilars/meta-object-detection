@@ -56,18 +56,22 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
 
-    # train_loader = datamodule.train_dataloader()
-    # val_loader = datamodule.val_dataloader().copy()
+    # train_loader = datamodule.train_dataloader().copy()
+    # # val_loader = datamodule.val_dataloader().copy()
     # import pdb
 
     # pdb.set_trace()
+
+    # train_iter = iter(train_loader)
+
+    # data = next(train_iter)
 
     log.info(f"Instantiating model <{cfg.model._target_}>")
     model: LightningModule = hydra.utils.instantiate(
         cfg.model,
         support_dataloader=datamodule.get_support_dataloader(),
-        base_ids=datamodule.val_base_ds,
-        novel_ids=datamodule.val_act_ids,
+        val_base_ds=datamodule.val_base_ds,
+        val_act_ids=datamodule.val_act_ids,
     )
 
     log.info("Instantiating callbacks...")
@@ -104,21 +108,21 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     train_metrics = trainer.callback_metrics
 
-    if cfg.get("test"):
-        log.info("Starting testing!")
-        ckpt_path = trainer.checkpoint_callback.best_model_path
-        if ckpt_path == "":
-            log.warning("Best ckpt not found! Using current weights for testing...")
-            ckpt_path = None
-        trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
-        log.info(f"Best ckpt path: {ckpt_path}")
+    # if cfg.get("test"):
+    #     log.info("Starting testing!")
+    #     ckpt_path = trainer.checkpoint_callback.best_model_path
+    #     if ckpt_path == "":
+    #         log.warning("Best ckpt not found! Using current weights for testing...")
+    #         ckpt_path = None
+    #     trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+    #     log.info(f"Best ckpt path: {ckpt_path}")
 
-    test_metrics = trainer.callback_metrics
+    # test_metrics = trainer.callback_metrics
 
     # merge train and test metrics
-    metric_dict = {**train_metrics, **test_metrics}
+    metric_dict = {**train_metrics}  # , **test_metrics}
 
-    return metric_dict  # , object_dict
+    return metric_dict, object_dict
 
 
 @hydra.main(version_base="1.3", config_path="../configs", config_name="train.yaml")

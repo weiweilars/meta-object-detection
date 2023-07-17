@@ -259,6 +259,7 @@ class MetaObjectModule(LightningModule):
 
     def validation_step(self, batch: Any, batch_idx: int):
 
+        # pdb.set_trace()
         samples, targets = batch
         samples = samples.to(self.params["device"])
         targets = [
@@ -276,8 +277,8 @@ class MetaObjectModule(LightningModule):
             self.params["device"],
             self.params["backbone"]["num_feature_levels"],
             self.postprocessors,
-            self.base_ds,
-            self.act_ids,
+            self.val_base_ds,
+            self.val_act_ids,
             number_of_supports=100,
         )
 

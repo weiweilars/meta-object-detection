@@ -14,10 +14,70 @@ from Meta_DETR.datasets.dataset import (
     supp_make_support_transforms,
 )
 
-# all cocos data class
-base_ids = [i for i in range(0, 91)]
-# TODO: add novel class
-novel_ids = [i for i in range(91, 100)]
+base_ids = [
+    8,
+    10,
+    11,
+    13,
+    14,
+    15,
+    22,
+    23,
+    24,
+    25,
+    27,
+    28,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    65,
+    70,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+]
+
+novel_ids = [1, 2, 3, 4, 5, 6, 7, 9, 16, 17, 18, 19, 20, 21, 44, 62, 63, 64, 67, 72]
 
 
 class MetaObjectDataModule(LightningDataModule):
@@ -56,7 +116,7 @@ class MetaObjectDataModule(LightningDataModule):
             # TODD: need to change the customer data to fit the structure, very important
             # Fewshot learning only evaluated on the novel ids
             self.activated_class_ids = base_ids + novel_ids
-            # TODO: both these need to create when the real data coming
+            # TODO: both these need to crea
             supp_ann = os.path.join(self.data_dir, "coco_fewshot/seed1/10shot.json")
             val_ann = os.path.join(self.data_dir, "coco_fewshot/seed1/val.json")
             self.val_base_ds = COCO(val_ann)
@@ -65,18 +125,16 @@ class MetaObjectDataModule(LightningDataModule):
         self.activated_class_ids.sort()
 
         self.dataset_support = SupportDataset(
-            img_folder=os.path.join(self.data_dir, self.train_params["img_folder"]),
-            ann_file=supp_ann,
-            support_transforms=make_support_transforms(),
-            activated_class_ids=self.activated_class_ids,
+            root=os.path.join(self.data_dir, self.train_params["img_folder"]),
+            annFiles=supp_ann,
+            transforms=make_support_transforms(),
+            activatedClassIds=self.activated_class_ids,
             cache_mode=self.cache_mode,
             local_rank=utils.get_local_rank(),
             local_size=utils.get_local_size(),
         )
 
         self.sampler_support = torch.utils.data.RandomSampler(self.dataset_support)
-
-    def setup(self, stage: Optional[str] = None):
 
         self.dataset_train = DetectionDataset(
             params=self.sup_params,
@@ -92,13 +150,12 @@ class MetaObjectDataModule(LightningDataModule):
             local_size=utils.get_local_size(),
         )
 
-        # print(dataset_train)
-
         sampler_train = torch.utils.data.RandomSampler(self.dataset_train)
 
         self.batch_sampler_train = torch.utils.data.BatchSampler(
             sampler_train, self.train_params.batch_size, drop_last=False
         )
+        # print(dataset_train)
 
         self.dataset_val = DetectionDataset(
             params=self.sup_params,
@@ -115,8 +172,6 @@ class MetaObjectDataModule(LightningDataModule):
         )
 
         self.sampler_val = torch.utils.data.SequentialSampler(self.dataset_val)
-
-        #
 
     def train_dataloader(self):
         """Train dataloader for the meta object detection."""

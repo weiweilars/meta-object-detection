@@ -19,4 +19,4 @@ check_val_every_n_epoch: 1
 deterministic: False
 
 
-fast_dev_run: True
+fast_dev_run: False # " FAST_DEV_RUN" that was set to true and that sets max_steps to 1 for debugging purposes, so in normal use: FAST_DEV_RUN should be false
